@@ -4,11 +4,13 @@
 6/13~ 국방부 지원 SW/Ai 교육
 
 ---
-## [카카오/groom](https://army.goorm.io/)
+## **[카카오/groom](https://army.goorm.io/)**
     
+### [웹 개발 트랙 - JS (고급)]()
+
 
 ---
-## [앨리스](https://military22.elice.io/explore)
+## **[앨리스](https://military22.elice.io/explore)**
 
 ### [자연어 처리 과정](https://github.com/Turtle-Hwan/2022-ROKA-SW.AI-edu/blob/main/Alice_NLP) (Natural Language Processing)
 
@@ -19,6 +21,21 @@
 
 4주 과정  
 
-*commit convention*  
+
+---
+## **[국방오픈소스아카데미](https://osam.kr/)**
+
+### 웹 개발 과정
+- HTML + CSS
+- JavaScript
+- Node.js
+- ReactJS
+
+
+
+
+---
+## **commit convention** 
 [study] : 새로운 내용 공부  
 [add] : 내용 뒤이어 추가  
+[mod] : 폴더, 파일 구조 변경
