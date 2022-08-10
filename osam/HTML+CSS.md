@@ -195,15 +195,23 @@ react 프로젝트 배포 시, "script"의 build 명령 실행 후 생성된 bui
 ```
 
 <이미지 맵>  
-하나의 이미지 안에서 여러 링크를 연결하고 싶을 때 사용한다.  
-이미지를 좌표 속성으로 지정이 가능한 상태로 만들어서, 좌표값으로 링크 영역을 그려내는 것이다.
-
-usemap 속성, `<map>` `<area>` 태그 사용 필요하다.   
+- 하나의 이미지 안에서 여러 링크를 연결하고 싶을 때 사용한다.  
+- 이미지를 좌표 속성으로 지정이 가능한 상태로 만들어서, 좌표값으로 링크 영역을 그려내는 것이다.
+- usemap 속성, `<map>` `<area>` 태그 사용 필요하다.   
 ```html
 <img src="google.png" alt="구글이미지" usemap="#google" >
 <map name="google">
-    <area shape="" coords="" href="" alt="">
+    <area shape="rect" coords="0,0,272,92" href="https://google.com" target="_blank" alt="구글로 이동하는 직사각형 부분">
+    <area shape="circle" coords="136,46,46" href="https://google.com" target="_blank" alt="구글로 이동하는 원형 부분">
 </map>
 
 ```
+이미지 태그의 usemap 속성을 이용해 map 태그와 연결한다.
 
+`<area>` 태그의 shape 속성 : 모양 결정, circle, default, poly, rect 가 있다.
+
+- rect의 경우, coords 좌표 값에 직사각형 왼쪽 위, 오른쪽 아래 두 값을 입력하면 된다.
+- circle의 경우, coords 좌표 값에 중심 좌표와 반지름을 입력하면 된다.
+
+
+단점은 좌표값을 쉽게 알 수 없다는 것. => [좌표값 얻을 수 있는 사이트](https://www.image-map.net/)
