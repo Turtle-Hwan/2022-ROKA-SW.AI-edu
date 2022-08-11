@@ -206,5 +206,64 @@ for (let day of days){
 변수 : let, const, var
 var는 한 번 선언된 변수를 다시 선언 가능하다.
 ```js
-var
+var name = 'Mike';
+console.log(name)  // Mike
+
+var name = 'Jane';
+console.log(name); // Jane
 ```
+let은 다시 선언하면 오류를 뿜음.  
+
+
+- 호이스팅 : 스코프 내부 어디서든 변수 선언은 최상위에 선언된 것처럼 행동
+
+var는 선언하기 전에 사용할 수 있다. (호이스팅)
+마치 위에서 선언한 것과 같은 효과. 단, 선언은 호이스팅 되나 할당은 호이스팅 되지 않는다.
+```js
+console.log(name); // undefined (name에 할당된 'Mike'는 호이스팅 되지 않아서 undefined 출력됨)
+var name = 'Mike';
+```
+동일 상황에서 let은 에러를 뿜는다. (ReferenceError)
+그런데 let도 호이스팅 된다.  
+그러면 왜 에러를 뿜는가? Temporal Dead Zone 때문이다.  
+TDZ 안에 있는 변수는 사용할 수 없다. let, const는 TDZ 영향을 받으며, 할당하기 전에 사용할 수 없다는 규칙을 가진다. **이는 코드를 예측 가능하게 해준다.**
+```js
+console.log(name)   //Temporal Dead Zone 이다. 호이스팅은 되지만 할당되지 않은 변수인 name 사용 불가하여 에러가 난다.
+const name = 'Mike' //함수 선언 및 할당
+console.log(name)   //사용 가능
+```
+```js
+//let이 호이스팅 되는 것을 보여주는 예시
+
+let age = 30;
+function showAge(){
+    console.log(age);   //let이 호이스팅 안 된다면 global scope 변수를 받아와 30이 출력되어야 하나, 호이스팅 되므로 에러가 출력된다.
+    let age = 20;
+}
+showAge();
+```
+
+<변수의 생성과정>
+1. 선언 단계
+2. 초기화 단계
+3. 할당 단계
+
+var : 
+1. 선언 및 초기화 단계 (초기화 : undefined를 할당해주는 단계)
+2. 할당 단계  
+할당 전에 호출하면 에러 대신 undefined가 나온다
+
+let :
+1. 선언 단계 (호이스팅 되면서 선언 이루어짐)
+2. 초기화 단계 (실제 코드에 도달해야 초기화가 이루어지므로 그 이전에 접근하면 레퍼런스 에러가 발생함.)
+3. 할당 단계  
+셋 다 분리되어서 진행된다.
+
+const :
+1. 선언 + 초기화 + 할당 (값을 바꿀 수 없기 때문에 동시에 이루어져야 한다.)
+
+
+var : 함수 스코프  (function-scoped)  
+let, const : 블록 스코프 (block-scoped)  
+블록 : 함수, if문, for문, while문, try/catch문 등
+
