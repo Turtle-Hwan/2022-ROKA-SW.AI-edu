@@ -267,3 +267,150 @@ var : 함수 스코프  (function-scoped)
 let, const : 블록 스코프 (block-scoped)  
 블록 : 함수, if문, for문, while문, try/catch문 등
 
+
+## 생성자 함수
+
+<객체 리터럴로 객체를 만드는 방식>
+```js
+let user = {
+    name : 'Mike',
+    age : 30,
+}
+```
+
+<생성자 함수로 객체를 만드는 방식>
+```js
+function User(name, age){
+    // this = {} : 빈 객체를 만들고, this에 할당한다.
+
+    this.name = name;
+    this.age = age; //this에 프로퍼티를 추가한다.
+
+    // return this; this를 반환한다.
+    
+    // 첫, 마지막 두 줄은 없으나 실제로 이렇게 동작한다.
+}
+
+let user1 = new User('Mike', 30);
+let user2 = new User('Jane', 22);
+let user3 = new User('Tom', 17);
+```
+* 생성자 함수는 첫 글자를 대문자로 하는 것이 관례이다.
+
+```js
+function User(name, age){
+    this.name = name;
+    this.age = age;
+    this.sayName = function(){
+        console.log(this.name);
+    }
+}
+
+let user5 = new User('Han', 40);
+user5.sayName(); // 'Han'   // 여기서 sayName 함수 안의 this가 user5가 됨.
+```
+
+
+## 객체 메소드, 계산된 프로퍼티 (Object methods, Computed property)
+
+<계산된 프로퍼티 (Computed property)>
+```js
+let a = 'age';
+const user = {
+    name : 'Mike',
+    [a] : 30 // age : 30
+}
+// user >> {name:"Mike", age: 30}
+```
+대괄호로 묶어주면, 특정 문자열이 아닌 미리 만들어진 변수에 값이 할당된다. (대괄호 안의 변수에 들어있는 값이 새로운 변수명이 된다.)
+```js
+const user = {
+    [1+4] : 5,
+    ["안녕"+"하세요"] : "Hello"
+}
+// user
+// {5:5, 안녕하세요: "Hello"}
+```
+
+<객체 메소드 (Methods)>
+```js
+Object.assign() : 객체 복제 (깊은 복사)
+
+const newUser = Object.assign({}, user); 
+// 초기값 {}에 user를 병합시킨다.
+// 이때 키가 같다면 덮어쓴다.
+```
+JS 객체 저장 변수에는 객체를 참조하는 주소값만 들어있음. => 단순히 `const newUser = user;` 이런 식으로 복사하면, newUesr 값을 변경하면 user 값도 변경되는 얕은 복사가 일어난다.
+
+```js
+Object.keys() : 키 배열 반환
+
+const user = {
+    name : 'Mike',
+    age : 30,
+    gender : 'male',
+}
+Object.keys(user);
+// ["name", "age", "gender"]
+```
+
+```js
+Object.values() : 값 배열 반환
+
+const user = {
+    name : 'Mike',
+    age : 30,
+    gender : 'male',
+}
+Object.values(user);
+// ['Mike', 30, 'male']
+```
+
+```js
+Object.entries() : 키 / 값 배열 반환
+
+const user = {
+    name : 'Mike',
+    age : 30,
+    gender : 'male',
+}
+Object.entries(user);
+/* [
+    ["name", "Mike"],
+    ["age", 30],
+    ["gender", "male"]
+   ]
+*/
+```
+```js
+Object.fromEntries() : 키 / 값 배열을 객체로 만들어 준다.
+
+const arr = [
+    ["name", "Mike"],
+    ["age", 30],
+    ["gender", "male"]
+];
+Object.fromEntries(arr);
+/*{
+    name : 'Mike',
+    age : 30,
+    gender : 'male',
+}*/
+```
+
+
+## 심볼 (symbol)
+- 객체 프로퍼티 키는 숫자나 boolean 형으로 만들어도 자동으로 문자형으로 처리된다.
+```js
+const obj = {
+    1 : '11111',
+}
+Object.keys(obj); // ["1"]
+```
+
+`const a = Symbol();` // new를 붙이지 않는다.
+- 유일한 식별자를 만들 때 사용한다.
+
+
+`const id = Symbol('id'); // 설명 붙여주는 것이 나중에 편하다.
+
