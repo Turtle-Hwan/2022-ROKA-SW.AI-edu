@@ -24,7 +24,7 @@
 
 ## **[국방오픈소스아카데미](https://osam.kr/)**
 
-### 웹 개발 과정
+### [웹 개발 과정](https://github.com/Turtle-Hwan/2022-ROKA-SW.AI-edu/blob/main/osam)
 - HTML + CSS
 - JavaScript
 - Node.js

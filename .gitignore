@@ -129,6 +129,8 @@ dmypy.json
 .pyre/
 
 
+## test
+/test
 
 ## 자료
 *.pdf

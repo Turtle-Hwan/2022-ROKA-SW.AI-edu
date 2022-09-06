@@ -409,8 +409,26 @@ Object.keys(obj); // ["1"]
 ```
 
 `const a = Symbol();` // new를 붙이지 않는다.
-- 유일한 식별자를 만들 때 사용한다.
+- 유일한 식별자를 만들 때 사용한다. 유일성이 보장된다.
+```js
+const a = Symbol();
+const b = Symbol();
 
+console.log(a) //Symbol()
+console.log(b) //Symbol()
+a === b; //false
+a == b; //false
+```
 
 `const id = Symbol('id'); // 설명 붙여주는 것이 나중에 편하다.
+```js
+const id = Symbol('id');
+const id1 = Symbol('id');
 
+console.log(id) //Symbol(id)
+console.log(id2) //Symbol(id)
+id === id1; //false
+id == id1; //false
+```
+
+property key : 심볼형
