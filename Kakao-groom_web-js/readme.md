@@ -1414,3 +1414,67 @@ select_num은 사용자가 숫자를 클릭했을 때 사용되는 함수로써,
 3. 유저 이름을 url 이 아닌 입력 칸으로 입력받기
 4. 게임이 진행 중일 때 상대방이 떠난 경우, 게임을 종료시키고 알림메세지 출력하기
 5. 그 외의 추가해보고 싶은 기능들
+
+
+---
+# 3주차
+---
+# 08
+# 3주차 주요 확장 모듈 - mongoose
+## mongoDB란?
+지금까지 배웠던 내용으로 채팅서비스를 만들어보기도 했지만, 일반 실생활에서 사용하는 웹서비스를 만들기에는 무리가 있습니다. 데이터를 저장하는 데이터베이스가 없기 때문입니다. 웹서비스의 역할을 제대로 수행하려면 데이터를 저장하고 필요할 때 열람할 수 있어야 합니다. 따라서 이번 챕터에서는 데이터베이스의 한 종류인 mongoDB를 node.js에서 사용하게 해주는 mongoose라는 노드의 확장모듈을 배울 것입니다.
+
+mongoose란, mongoDB라는 NoSQL 데이터베이스를 지원하는 노드의 확장모듈입니다. mongoose는 mongoDB의 ODM입니다. ODM은 Object Document Mapping의 약자로, 문서를 DB에서 조회할 때 자바스크립트 객체로 바꿔주는 역할을 합니다. mongoDB의 ODM에는 mongodb-native 등 여러 개가 있지만 그중 mongoose가 가장 많이 사용됩니다. mongoose가 mongoDB를 사용하는 npm이기 때문에, mongoose를 배우기 전에 먼저 mongoDB에 대해서 알아보도록 하겠습니다.
+
+### NoSQL
+기존의 데이터베이스들은 대부분 관계형 모델에 기반을 두고 있으므로 대부분 SQL이라는 질의문에 의해 데이터베이스를 수정, 갱신, 저장, 검색하도록 구성되어 있습니다. 그러나 최근 들어 이러한 관계형 데이터베이스 모델과는 다른 데이터베이스 관리 시스템에 대한 관심이 증가하고 있는데, 이러한 시스템을 일컬어 NoSQL(Not Only SQL)이라고 부르며 mongoDB는 이러한 데이터베이스 시스템 중 하나입니다. 빅데이터를 다룰 때 RDBMS로만 트래픽을 감당하기 어려워져 이를 해결하기 위해 탄생한 것이 NoSQL입니다. 관계형 데이터 모델을 사용하지 않고 SQL을 사용하지 않는 그 이외의 모든 데이터베이스 시스템 또는 데이터 스토어를 일컬어 NoSQL이라고 칭합니다. 가장 큰 특징은 확장성과 기용성, 높은 성능, 그리고 다양한 데이터 형태를 수용할 수 있다는 것입니다. 
+
+NoSQL은 무한에 가까운 확장성을 제공하는데, 이를 위해 NoSQL 데이터베이스는 단순한 키와 값의 쌍으로 이루어져 있습니다. 인덱스와 데이터는 분리되어 별도로 운영되며 고정된 스키마도 없습니다. RDBMS와는 다르게 테이블 스키마가 유동적이라 다양한 형태들의 데이터를 유연하게 처리할 수 있습니다. 대신 분산형 구조이기 때문에 분산 시스템의 특징을 반영합니다. NoSQL의 대표적인 제품은 구글의 빅테이블, 그리고 mongoDB 등이 있습니다. 그 밖의 NoSQL에는 Cassandra, HBase, Redis, Coherence, CouchDB, Couchbase, Riak 등이 있습니다.
+
+### mongoDB
+mongoDB는 문서지향(Document-Oriented) 저장소를 제공하는 NoSQL 데이터베이스 시스템으로, 현존하는 NoSQL 데이터베이스 중 인지도 1위를 유지하고 있습니다. mongoDB에서는 데이터가 Document로 불리며, 이 데이터의 집합을 Collection(RDMS에서는 Table)이라고 합니다. 스키마 제약 없이 자유롭고, BSON(Binary JSON) 형태로 각 문서가 저장되며 배열(Array)이나 날짜(Date) 등 기존 RDMS에서 지원하지 않던 형태로도 저장할 수 있기 때문에 JOIN이 필요 없이 한 문서에 좀 더 이해하기 쉬운 형태 그대로 정보를 저장할 수 있다는 것이 특징입니다. 
+
+특히 mongoDB는 문서지향 데이터베이스로, 이것은 객체지향 프로그래밍과 잘 맞고 JSON을 사용할 때 아주 유용합니다. 따라서 자바스크립트를 기반으로 하는 Node.js와 호환이 매우 좋기 때문에, Node.js에서 가장 많이 사용되는 데이터베이스입니다. 물론 mysql 같은 관계형 데이터베이스 사용도 가능합니다.
+
+문서지향 데이터베이스에서는 행 개념 대신 보다 유연한 모델인 문서를 이용하는데, 내장문서와 배열 따위의 표현이 가능해서 복잡한 객체의 계층 관계를 하나의 레코드로 표현할 수 있습니다. 이러한 문서지향 데이터베이스로는 mongoDB 이외에도 10gen, Couchbse, CouchDB 등이 있습니다.
+
+실제로 mongoDB를 대규모로 사용하는 곳 중에 유명한 사이트는 여행 예약 사이트 Expedia, 위치기반 SNS Foursquare가 있습니다.
+
+### mongoDB 특징
+Join이 없으므로 Join이 필요 없도록 데이터 구조화가 필요
+다양한 종류의 쿼리문을 지원(필터링, 수집, 정렬, 정규표현식 등)
+관리의 편의성
+스키마 없는(Schemaless) 데이터베이스를 이용한 신속 개발. 필드를 추가하거나 제거하는 것이 매우 쉬워짐
+쉬운 수평 확장성
+인덱싱 제공
+
+### SQL과의 비교
+일반적으로 많이 사용되는 것은 SQL입니다. 따라서 NoSQL인 mongoDB의 질의문은 조금 어색할 수도 있습니다. mongoDB 공식 사이트에서 SQL 문과 비교해 놓은 것이 있는데, 한번 읽어보면서 익숙해지도록 노력해봅시다.
+
+MySQL 용어	mongoDB 용어/개념
+database	database
+table	collection
+index	index
+row	JSON document
+column	JSON field
+join	embedding and linking
+primary key	_id field
+group by	aggregation
+
+
+mongoDB에서는 질의문이 모두 JSON(BSON) 객체로 표현됩니다. 그리고 데이터베이스에 접근하고 조정하는 구문은 자연어에 가까운 SQL에 비해 자바스크립트 문법에 가까운 모습을 보입니다.
+
+SQL 구문	mongoDB 구문
+CREATE TABLE USERS(a Number, b Number)	db.createCollection("mycoll")
+INSERT INTO USERS VALUES(3, 5)	db.users.insert({a:3, b:5})
+SELECT * FROM users	db.users.find()
+SELECT a,b FROM users WHERE age=20	db.users.find({age:20}, {a:1, b:1})
+SELECT *FROM users WHERE age=20 ORDER BY name	db.users.find({age:20}).sort({name:1})
+
+
+
+## mongoose 살펴보기
+## 온라인 메모장 만들기 - 구현에 앞서
+## 온라인 메모장 만들기 - 코드
+## 온라인 메모장 만들기 - 설명
+## 온라인 메모장 만들기 - 도전 문제
