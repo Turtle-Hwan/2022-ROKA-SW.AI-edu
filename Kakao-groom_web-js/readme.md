@@ -933,5 +933,88 @@ http.listen(3000, function(){
 	console.log('server on..');
 });
 ```
+1번 - 채팅방에 접속했을 때
+
+기본 기능에서 달라진 코드는 한 줄 밖에 없습니다. 바로 new_connect 이벤트를 생성하는 io.emit 이죠. 모든 사용자에게 접속 알림을 주어야 하기 때문에, socket.emit이 아닌 io.emit을 사용하였습니다. 어떤 사용자가 접속했는지 알려주어야 하므로, 처음으로 생성된 닉네임값인 name을 전달해주었습니다. socket.name에도 name이 들어가 있기 때문에 socket.name을 전달해도 상관없습니다.
+2번 - 채팅방 접속이 끊어졌을 때
+
+여기서도 마찬가지로 딱 한 줄만 추가되었습니다. new_disconnect 이벤트를 생성하는 io.emit입니다. 퇴장 알림도 모든 사용자에게 알려주어야 하므로 io를 사용했고, 퇴장한 사용자의 이름이 저장되어 있는 socket.name을 전달해주었습니다.
+3번 - 메세지를 보냈을 때
+
+여기서는 두 줄이 추가되었는데, 바로 닉네임을 바꿨을 때의 조건문입니다. 클라이언트 페이지에서 닉네임값은 name으로 들어오는데, 아직 socket.name은 바뀌기 전이므로 이 두 값을 비교하면 닉네임이 바뀌었는지 알 수 있습니다. 만약 닉네임이 바뀌었으면, change name이라는 이벤트를 발생시킵니다. 그리고 알림을 줄 때 바뀌기 전 닉네임과 새로운 닉네임 값이 필요하므로 둘 다 전달해줍니다.
+
+```pug
+// chat.pug
+
+doctype 5
+html
+  head
+    title= 'Chat'
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css", integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous")
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js", integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous")
+    script(src='/socket.io/socket.io.js')
+    script(src='//code.jquery.com/jquery-1.11.1.js')
+  body
+    center
+      div
+        button.btn.btn-info(type='button') Goorm 채팅방
+      div
+        textarea#chatLog.form-control(readonly='')
+      form#chat
+        input#name.form-control(type='text')
+        input#message.form-control(type='text')
+        button.btn.btn-primary(type='submit') 전송
+      #box.box
+	  
+    script.
+      var socket = io(); 
+	  
+      $('#chat').on('submit', function(e){   // 전송 버튼을 누를 때 - 1
+      socket.emit('send message', $('#name').val(), $('#message').val());
+      $('#message').val('');
+      $('#message').focus();
+      e.preventDefault();
+      });
+	  
+      socket.on('create name', function(name){   // 이름 셋팅 - 2
+      $('#name').val(name);
+      });
+	  
+      socket.on('change name', function(oldname, name){   // 닉네임을 바꿨을 때 - 3
+      $('#chatLog').append('<알림> ' + oldname + '님이 ' + name +'님으로 닉네임을 변경했습니다.\n');
+      });
+	  
+      socket.on('receive message', function(msg){   // 메세지를 받았을 때 - 4
+      $('#chatLog').append(msg+'\n');
+      $('#chatLog').scrollTop($('#chatLog')[0].scrollHeight);
+      });
+	  
+      socket.on('new_disconnect', function(name){  // 채팅방 접속이 끊어졌을 때 - 5
+      $('#chatLog').append('<알림> ' + name + '님이 채팅창을 떠났습니다.\n');
+      });
+	  
+      socket.on('new_connect', function(name){  // 채팅방에 접속했을 때 - 6
+      $('#chatLog').append('<알림> ' + name + '님이 채팅창에 접속했습니다.\n');
+      });
+```
+3번 - 닉네임을 바꿨을 때
+
+1번과 2번은 기본 강의와 동일하므로 생략합니다. 2번과 마찬가지로 닉네임을 바꿨을 때도 닉네임 input의 값을 바꿔줍니다. 그리고 전달받은 전 닉네임과 새로운 닉네임을 이용하여 chatLog에 출력해줍니다. 알림 문구는 원하는 대로 쓰시면 됩니다.
+5번 - 채팅방 접속이 끊어졌을 때
+
+새로 생긴 이벤트 리스너입니다. 닉네임을 바꿨을 때와 비슷하게 전달받은 이름을 이용하여 채팅창을 떠났다는 알림을 출력해줍니다.
+6번 - 채팅방에 접속했을 때
+
+5번과 동일합니다. 새로운 사용자가 접속했다는 알림을 출력해줍니다.
+
+닉네임을 변경했을 때, 새로운 사용자가 들어왔을때, 사용자가 채팅방을 나갔을 때 알림이 뜨도록 기능을 추가해봅시다.
 
 ## socket.io를 이용한 채팅 구현 - 도전 문제
+채팅 페이지가 완성되었습니다.
+
+추가 기능 강의를 이용해 알림 기능도 넣어보았는데, 그 외에도 채팅 페이지에 다양한 기능을 추가하는데 도전해보세요.
+
+UI 더 예쁘게 꾸며보기
+실시간으로 접속중인 유저 이름 보여주기
+그 외 추가해보고 싶은 기능
