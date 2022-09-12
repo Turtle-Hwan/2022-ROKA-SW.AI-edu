@@ -13,3 +13,12 @@ server.createServer(function(req, res){
 
 console.log('Server is running at http://localhost:3000/');
 console.timeEnd('time');
+
+
+/*
+해당 폴더로 이동 후,
+node <파일명>
+명령어로 node.js 파일 실행 가능하다.
+
+node hellonode.js
+*/
