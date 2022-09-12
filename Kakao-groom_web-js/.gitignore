@@ -1,4 +1,4 @@
-/node_modules
-/new_express_proj
+*/node_modules
+# /new_express_proj
 
-readme.md
+# readme.md
