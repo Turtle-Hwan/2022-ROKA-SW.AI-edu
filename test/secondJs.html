@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>What time is it now</title>
+    <script type="text/javascript">
+        function getTime() {
+            var d = new Date();	// 현재 날짜와 시간
+            var hur = d.getHours();		// 시
+            var min = d.getMinutes();	//분
+            var sec = d.getSeconds();	//초
+            var milsec = d.getMilliseconds(); //밀리초
+
+            var timeBoard = document.getElementById("WhatTimeIsItNow"); // 값이 입력될 공간
+
+            var time = "현재 시간 : " + hur + "시 " + min + "분 " + sec + "초 " + milsec // + "밀리초" // 형식 지정
+
+            timeBoard.innerHTML = time;	// 출력
+
+            setTimeout(getTime, 1);	//1000밀리초(1초) 마다 반복
+
+            const progressBar = document.getElementById("progress");
+            //progressBar.setAttribute("min", "0");
+            //console.log(progressBar.getAttribute("min"))
+            let startArmy = new Date(2022, 00, 17, 00)  //왜 00월이 1월이지..?
+            let endArmy = new Date(2023, 06, 16, 00)
+            console.log(startArmy, endArmy, startArmy.getTime(), endArmy.getTime(), d.getTime())
+
+            progressBar.setAttribute("min", 0)
+            progressBar.setAttribute("max", endArmy.getTime() - startArmy.getTime())
+            progressBar.setAttribute("value", d.getTime() - startArmy.getTime())
+            //console.log('퍼센트 표시기')      value / max - min  * 100 %
+            let totalT = endArmy.getTime() - startArmy.getTime();
+            let nowT = d.getTime() - startArmy.getTime();
+
+            let percentView = document.createElement("div");
+            percentView.innerHTML = `${(nowT * 100 / totalT).toFixed(7)}%`;
+
+            timeBoard.appendChild(percentView);
+
+        }
+    </script>
+    <style type="text/css">
+        #progress {
+            appearance: none;
+        }
+
+        #progress::-webkit-progress-bar {
+            background: #f0f0f0;
+            border-radius: 5px;
+            box-shadow: inset 3px 3px 10px #ccc;
+            height: 40px;
+            width: 90vw;
+
+            transition: 0.15s;
+            transition-property: width, background-color;
+
+        }
+
+        #progress::-webkit-progress-value {
+            border-radius: 5px;
+            /*background: #1D976C;*/
+            /*background: -webkit-linear-gradient(to right, #93F9B9, #1D976C);*/
+            background: linear-gradient(to right, #93F9B9, #1D976C);
+
+            animation: move-gradient 1s ease infinite;
+
+            @-webkit-keyframes move-gradient {
+                0% {
+                    background-image: red
+                }
+
+                100% {
+                    background-position: right bottom
+                }
+            }
+        }
+    </style>
+</head>
+
+<body id="bd" onload="getTime()">
+    <div id="WhatTimeIsItNow"></div>
+    <progress id="progress" value="100" min="1" max="1000"></progress>
+    <!--
+        html에서 이용하는 progress tag는 로딩바 형태의 UI를 생성해준다.
+        안에 들어가는 속성은 아래와 같다.
+        value : 실제 값
+        min: progress의 최소값
+        max: progress의 최댓값
+ 
+        css
+        ::-webkit-progress-bar
+        progressbar의 배경이 되는 요소
+ 
+        ::-webkit-progress-value
+        progress의 진행 bar가 되는 요소
+
+
+        https://css-tricks.com/html5-progress-element/
+    -->
+</body>
+
+</html>
