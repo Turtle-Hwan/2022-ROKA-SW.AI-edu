@@ -1474,7 +1474,190 @@ SELECT *FROM users WHERE age=20 ORDER BY name	db.users.find({age:20}).sort({name
 
 
 ## mongoose 살펴보기
+### mongoose 모듈이란?
+전 강의에서 간단히 설명했지만, moongoose는 mongoDB라는 NoSQL 데이터베이스를 지원하는 노드의 확장 모듈입니다. 기능이 추가되어 다양한 기능들로 편의성을 높였으나, 속도는 조금 떨어집니다. 그런데도 mongoose가 가장 많이 쓰이는 모듈 중 하나인 것은 오브젝트(object)들을 만들고, 오브젝트와 data를 묶어서 사용하는 ODM(Object Data Mapping)의 특성 때문입니다.
+
+mongoose는 데이터를 만들고 관리하기 위하여 스키마(Schema)를 만들고, 그 스키마로 모델(Model)을 만듭니다. NoSQL인 mongoDB는 RDBMS와 달리 컬럼과 로우로 구성되어야만 하는 일반적인 데이터베이스 스키마의 제한을 벗어나 있습니다. mongoose는 그러한 mongoDB의 구성 철학에 따른 장점을 그대로 가져왔습니다. 즉, 스키마와 모델을 만드는 것을 통하여 data를 불러온 후에 그 데이터를 객체화시켜 빠르게 수정함으로써 데이터에 접근할 수 있게 해줍니다. 분명하게 모델링된 문서(Document)들이 모여있는 Collection을 관리하는 것이 수월해진다는 장점 또한 가지고 있습니다. 
+
+mongoose 모듈을 npm을 이용하여 로컬로 설치하는 명령어는 아래와 같습니다. 글로벌로 설치해도 크게 상관은 없습니다. 
+
+npm install mongoose
+
+단, 몽구스를 사용하려면 mongoDB가 필요한데, 그 방법은 다음 실습 강의에서 자세히 다루도록 하겠습니다. 이번 강의에서는 몽구스를 사용하는 코드에 대해 알아보겠습니다.
+
+### 주요 메소드 살펴보기
+mongoDB 연결하기
+우선 mongoDB에 연결해야 합니다. 먼저 require() 함수를 통해 확장 모듈을 mongoose 객체에 로드하여 만듭니다. mongoose 객체에는 기본적으로 데이터베이스에 연결하는 connect() 메소드가 제공됩니다. 이 메소드는 mongodb:// 로 시작하는 URI 값이나 host, database, port, options를 인자로 받습니다. 이번 강좌에서는 문법을 이런 식으로 사용한다는 정도만 알아두세요. 
+
+```js
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/goormdb')
+```
+위에서처럼 데이터베이스가 연결되면, connection 인스턴스가 생성되며 연결되는 순간에는 open 이벤트가 발생합니다. 이때 인스턴스는 mongoose.connection입니다. goormdb라는 데이터베이스가 없다면 mongoDB는 이를 자동으로 생성합니다.
+
+그런데 위의 방법은 단 하나의 데이터베이스에 연결할 때에만 유효합니다. 만약 다른 데이터베이스도 함께 사용하고자 mongoose.connect()를 다시 호출하면 mongoose.connection 인스턴스는 새로운 데이터베이스에 연결된 것으로 변경되게 됩니다. 따라서 여러 데이터베이스를 사용하고자 할 때는 mongoose.connect()를 사용할 수 없습니다.
+
+이 때는 mongoose.createConnection() 메소드를 사용하면 됩니다. 이 메소드는 mongoose.connection()과 같은 인자를 받으면서 반환값으로 connection 인스턴스를 반환합니다.
+
+또한 mongoose 5 버전부터는 업데이트가 되어 useNewUrlParser 옵션을 사용해주지 않으면 경고 메세지가 출력됩니다. 따라서 
+
+mongoose.connect('mongodb://localhost/goormdb', { useNewUrlParser });
+형태로 쓰는 것이 좋습니다.
+
+```js
+var mongoose = require('mongoose');
+var connection1 = mongoose.createConnection('mongodb://localhost/mydb1');
+var connection2 = mongoose.createConnection('mongodb://localhost/mydb2');
+```
+이 방법으로 하나의 애플리케이션에서 여러 데이터베이스로 연결 가능하다.
+
+### 모델 정의하기
+mongoose의 모델은 mongoDB에서의 데이터를 저장하는 기본 단위인 도큐먼트의 형태를 의미합니다. 이것은 mongoose에서 제공하는 Schema라는 인터페이스를 통해 생성할 수 있습니다. 모델을 생성하기 위해 다음과 같은 스키마가 필요합니다.
+```js
+var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
+var ArticleSchema = new Schema({
+    author: ObjectId,
+    title: String,
+    body: String,
+    date: Date
+});
+```
+
+이렇게 정의한 스키마를 이용해 모델을 정의하려면 mongoose.model('ModelName', Schema)을 이용해야 합니다. 다음과 같은 함수를 이용해서 모델에 접근할 수 있습니다.
+```js
+var ArticleModel = mongoose.model('Article', ArticleScheme);
+```
+이 코드는 앞서 생성한 ArticleSchme를 이용하여 Article이라는 모델을 생성하는 코드입니다. 이제 이 모델을 어떻게 사용할지 알아봅시다.
+
+### 모델 사용하기
+모델을 사용하려면 생성한 모델의 인스턴스를 또 한 번 생성하여야 합니다. 생성한 인스턴스를 이용하여 우리가 원하는 실제 데이터베이스 작업을 수행할 수 있습니다.
+
+### 검색하기
+도큐먼트, 즉 우리가 원하는 데이터는 find(), findOne(), findById() 메소드를 통해 검색할 수 있습니다. 이런 메소드들은 Model 인스턴스에서 실행됩니다. 이것들은 mongoDB의 검색 메소드와 유사합니다. 다음의 find()메소드의 인자들은 각각 검색 질의문, 출력하고자 하는 필드, 옵션, 그리고 콜백 함수입니다.
+```js
+Model.find(query, fields, options, callback)
+```
+
+다음 예제는 some.value=5 인 Document를 검색합니다. 이때 콜백 함수로 넘어오는 인자 중 docs는 배열로서 검색된 모든 도큐먼트를 담고 있습니다.
+
+```js
+Model.find({'some.value':5}, function(err,docs){
+            // 콜백 함수의 내용
+});
+```
+
+다음은 특정 필드 값을 얻으려고 검색한 모든 도큐먼트에서 그것들이 생성될 때 디폴트로 만들어진 필드 값(ObjectID)을 출력하는 예제입니다.
+```js
+Model.find({}, ['first','last'], function(err, docs){
+            // 콜백 함수의 내용
+});
+```
+
+Model.findOne() 메소드는 Model.find()와 거의 같지만, 오직 하나의 도큐먼트만이 두 번째 인자로 넘긴 콜백 함수의 doc 인자로 전달됩니다. 이때 이 doc은 단 하나의 객체입니다. 다음 예제는 age가 5인 도큐먼트를 하나만 검색합니다.
+```js
+Model.findOne({age: 5}, function(err, doc){
+            // 콜백 함수의 내용
+});
+```
+
+마지막으로 Model.findById() 메소드는 findOne() 메소드와 마찬가지로 단 하나의 도큐먼트만 반환하지만 _id 키 값을 이용하여 검색합니다.
+```js
+Model.findById(obj._id, function(err, doc) {
+            // 콜백 함수의 내용
+});
+```
+
+### 도큐먼트 추가
+mongoose에서 새로운 도큐먼트를 저장하는 방법입니다. 모델을 생성하면서 title과 body 필드의 값을 먼저 채우고 article.date와 같이 객체의 멤버에 접근하는 방식을 통해 날짜 값도 부여합니다. 이것을 최종적으로 컬렉션에 저장하려면 article.save() 메소드를 호출하면 됩니다.
+```js
+var article = new ArticleModel({title: "Title", body: "Contents"});
+article.date = new Date();
+article.save(function (err) {
+    if(err) {
+        return handleError(err);
+    }
+            // save() 성공 후 수행할 내용
+});
+```
+
+별도의 모델 인스턴스를 생성하지 않고 모델을 이용하여 바로 도큐먼트를 추가하는 방법도 있습니다. 모델 객체에서 create() 메소드 호출을 통해 바로 데이터를 입력하는 예제 코드입니다.
+```js
+ArticleModel.create({title: "Title", body: "Contents", date: new Date()}, function(err) {
+    if(err) {
+        return handleError(err);
+    }
+            // save() 성공 후 수행할 내용
+});
+```
+
+### 도큐먼트 삭제
+모델 객체의 remove() 메소드 호출을 통해 특정 조건에 맞는 도큐먼트를 삭제할 수 있습니다. mongoDB 3.2 버전부터는 remove메소드에서 좀 더 세분화된 deleteOne, deleteMany가 추가되면서 remove 대신 이 두 메소드를 사용하는 것을 권장합니다. deleteOne은 매칭되는 첫 번째 도큐먼트만 지우고, deleteMany는 매칭되는 모든 도큐먼트를 지운다는 점에서 차이가 있습니다. 사용 방법은 같습니다. 
+```js
+ArticleModel.remove({title: "Title"}, function(err){
+    if(err){
+        return handleError(err);
+    }
+            // remove() 성공후 수행할 내용
+})
+```
+
+
 ## 온라인 메모장 만들기 - 구현에 앞서
+이번 강의에서는 mongoose를 연결해서 데이터가 계속 저장되는 온라인 메모장을 만들어보겠습니다. 
+
+아래와 같이 간단하게 작성할 수 있고, 수정이나 삭제가 가능한 메모장입니다. 이번에는 코드가 전 챕터보다 긴 관계로 화면에 색깔만 넣고, 부트스트랩은 사용하지 않겠습니다. 기능을 다 구현하고 난 후, 좀 더 예쁘게 꾸미고 싶은 분들은 부트스트랩도 적용해보세요.
+
+부트스트랩 홈페이지에서 get start를 누른 후 나오는 CSS 코드와 JS 코드를 head 부분에 넣어준 뒤 (이해가 어렵다면 전 챕터에서 만들었던 채팅 코드를 참고하시면 됩니다) components에서 원하는 컴포넌트 종류를 찾은 후, 작성했던 코드를 변경하면 됩니다. 먼저 기능 구현부터 다 완료한 뒤 도전해보세요.
+
+### 주요 기능
+이번 챕터에서 구현할 온라인 메모장에는 아래와 같은 주요 기능이 있습니다.
+
+1. 제목과 내용, 날짜 저장
+2. 수정 가능
+3. 삭제 가능
+![](https://grm-project-template-bucket.s3.ap-northeast-2.amazonaws.com/lesson/les_eTucP_1658467855154/4ff4c7107d6547f5f2ddb5ab55677db33aeade7c21708feaa6f17471ad2e68b0.png)
+
+먼저 mongoose를 사용하기 위해선, mongoDB를 설치해야 합니다. 프로젝트 폴더에 로컬로 설치할 수도 있지만 좀 더 간편하게 온라인으로 mongoDB를 제공해주는 클라우드 서비스를 이용해보도록 하겠습니다.
+
+mongoDB 클라우드 서비스에는 mLab과 mongoDB에서 자체적으로 제공하는 Atlas가 제일 유명하지만 mLab이 18년 10월 mongoDB에게 인수된 이후 Atlas로의 마이그레이션을 권장하고 있습니다. Atlas는 무료 사용자에게도 512MB를 제공해주기 때문에 프로젝트 연습용으로 사용하기에 적합합니다. 따라서 이번 강의에서는 Atlas를 이용하도록 하겠습니다. 
+
+### MongoDB(Atlas) 가입
+https://www.mongodb.com/에 접속해서 가입해봅시다.
+가운데에 이메일 주소를 적고, Get started free 버튼을 누르면 가입할 수 있습니다.
+First Name, Last Name을 적고 비밀번호를 입력한 후 가입하면 됩니다. 
+따로 비밀번호 확인란이 없으니 비밀번호가 틀리지 않도록 주의해서 입력해주세요.
+
+Get started Free 버튼을 누르고 나면 자동으로 로그인이 되면서 위와 같은 창이 뜨는데, Build my first cluster 버튼을 눌러서 첫 클러스터를 생성해줍시다.
+
+이제 클라우드 서비스를 선택할 수 있습니다. 본 강의에서는 AWS를 선택했습니다. 무료로 생성하기 위해서는 FREE TIER AVAILABLE이라고 적혀 있는 지역을 선택해주시면 됩니다. 저는 아시아의 싱가폴을 선택했는데, FREE TIER라고 적혀있으면 버지니아나 프랑크푸르트 같은 다른 지역을 선택하셔도 무방합니다.
+
+이제 클러스터 레벨을 선택해줍니다. M0이 무료로 512MB 공간을 제공해주는 것으로, M0을 선택해주시면 됩니다. 나머지는 유료 서비스입니다. M0 클러스터는 한 프로젝트당 하나만 생성 가능합니다. 
+
+이제 클러스터 이름을 설정해주세요. 앞으로 이 클러스터 하나로 여러 개의 데이터베이스를 만들어 관리할 수 있습니다. 적당한 이름을 적어주세요. 이름을 적고 난 후 아래에 있는 Create Cluster 버튼을 눌러 생성해줍니다. 
+
+클러스터가 최종적으로 생성되는데, 위와 같이 버튼을 누르고 난 후에는 1~2분 정도 생성시간이 필요합니다. 잠시 기다리고 나면 클러스터가 생성됩니다.
+
+생성되고 나면, 클러스터의 CONNECT 버튼을 클릭해주세요.
+
+그러면 위와 같은 화면이 뜨는데, 여기서 DB를 사용할 유저를 등록해주어야 합니다. 유저네임과 비밀번호를 입력해주세요. 원하시는 이름과 비밀번호로 적어주시면 됩니다.
+
+그리고 Create MongoDB User를 눌러서 유저를 생성하고 나면, Choose a connection method 버튼을 클릭해주세요.
+여기서 Connect Your Application 버튼을 클릭해주세요.
+이제 DB를 사용하기 위한 준비가 완료되었습니다. 상단에 보면 SRV connection string(3.6+ driver) 이라는 버튼이 있는데, 누르면 위와 같은 코드가 있습니다. 저기서 password 부분을 조금 전 설정했던 대로 바꿔서 사용하면 됩니다.
+
+또 코드에서 보이는 test도 임의의 클러스터 이름인데, 앞으로 사용할 데이터베이스의 이름을 적어주면 됩니다. 일단 위 코드를 복사해서 저장해 두세요.
+
+추가적으로, mongoDB에서는 DB에 접근할 수 있는 IP 주소도 설정할 수 있습니다. 따로 설정해주지 않으면 connection error가 뜨게 됩니다. 지금 만드는 것은 연습용 프로젝트이기 때문에 모든 아이피를 접속 허용해주도록 합시다.
+
+클러스터 맨 처음 화면에서 Security 탭을 선택한 후, IP Whitelist를 클릭해주세요. 그리고 ADD IP ADDRESS를 눌러줍니다.
+
+여기서 ALLOW ACCESS FROM ANYWHERE를 눌러 모든 IP주소를 허용해줍시다. 0.0.0.0/0 이 입력되면, Confirm을 눌러줍니다. 마찬가지로 결과 반영까지 1~2분 정도의 시간이 소요됩니다. IP 주소를 허용하지 않은 상태로 코드를 작성하면, 접속 시 에러가 나므로 주의합시다.
+
+다음 강의에서는 본격적으로 온라인 메모장을 만들어 보도록 하겠습니다.
+
+
+
+
 ## 온라인 메모장 만들기 - 코드
 ## 온라인 메모장 만들기 - 설명
 ## 온라인 메모장 만들기 - 도전 문제
